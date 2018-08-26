@@ -3,7 +3,6 @@
 const secp256k1 = require('secp256k1');
 const { randomBytes, createHash } = require('crypto');
 
-
 /**
  * A function which generates a new random Secp256k1 private key, returning
  * it as a 64 character hexadecimal string.
@@ -15,7 +14,15 @@ const { randomBytes, createHash } = require('crypto');
  */
 const createPrivateKey = () => {
   // Enter your solution here
-
+	
+	let privKey
+	do {
+  	privKey = randomBytes(32)
+	//console.log(privKey.toString())
+	} while (!secp256k1.privateKeyVerify(privKey))
+	
+	
+	return privKey.toString('hex')
 };
 
 /**
@@ -33,7 +40,11 @@ const createPrivateKey = () => {
  */
 const getPublicKey = privateKey => {
   // Your code here
-
+	
+	let publicKey
+	publicKey = secp256k1.publicKeyCreate(Buffer.from(privateKey,'hex'))
+	
+	return publicKey.toString('hex')
 };
 
 /**
@@ -51,7 +62,27 @@ const getPublicKey = privateKey => {
  */
 const sign = (privateKey, message) => {
   // Your code here
-
+	console.log(message)
+	const hash = createHash('sha256');
+	if (message)
+	{
+	   console.log('true')
+   	   hash.update(Buffer.from(message))
+	   //console.log(hash.digest('hex'))
+    }
+ 	else 
+	{
+    	   console.log('Error')
+  	}
+	console.log('Before')
+	let msg = Buffer.from(hash.digest('hex'), 'hex')
+	//hash.update(privateKey)
+	let privKey = Buffer.from(privateKey, 'hex')
+	let sigObj = secp256k1.sign(msg, privKey)
+	console.log('After')
+	let sig = Buffer.toString(sigObj.signature)
+	//console.log(sigObj.signature.buffer.toString())
+	return sigObj.signature.toString('hex')
 };
 
 /**
@@ -66,7 +97,22 @@ const sign = (privateKey, message) => {
  */
 const verify = (publicKey, message, signature) => {
   // Your code here
-
+  console.log(message)
+  const hash = createHash('sha256');
+  if (message)
+  {
+	 console.log('true')
+		hash.update(Buffer.from(message))
+	 //console.log(hash.digest('hex'))
+  }
+   else 
+  {
+		 console.log('Error')
+	}
+  console.log('Before')
+  let msg = Buffer.from(hash.digest('hex'), 'hex')
+	
+  	return secp256k1.verify(msg, Buffer.from(signature, 'hex'), Buffer.from(publicKey, 'hex'))
 };
 
 module.exports = {

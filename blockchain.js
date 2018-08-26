@@ -21,8 +21,16 @@ class Transaction {
    *   - signature: a unique signature generated from a combination of the
    *     other properties, signed with the provided private key
    */
+  
   constructor(privateKey, recipient, amount) {
     // Enter your solution here
+    this.source = signing.getPublicKey(privateKey)
+    this.recipient = recipient
+    this.amount = amount
+    const signedMessage = this.source + recipient + amount;
+
+    this.signature = signing.sign(privateKey, signedMessage)
+
 
   }
 }
@@ -45,7 +53,8 @@ class Block {
    */
   constructor(transactions, previousHash) {
     // Your code here
-
+    this.transactions = transactions
+    this.previousHash = previousHash
   }
 
   /**
@@ -57,8 +66,14 @@ class Block {
    *   unique and deterministic, and must become invalid if any of the block's
    *   properties change.
    */
-  calculateHash(nonce) {
+  calculateHash(nonce)
+   {
     // Your code here
+    this.nonce = nonce
+    //this.hash = 'batata'
+    let hasher = createHash('sha256');
+    hasher.update(Buffer.from(''+ nonce))
+    this.hash = hasher.digest().toString()+ this.transactions + this.previousHash;
 
   }
 }
@@ -77,9 +92,15 @@ class Blockchain {
    * Properties:
    *   - blocks: an array of blocks, starting with one genesis block
    */
+  
   constructor() {
     // Your code here
-
+    this.blocks = []
+    const transactions = []
+    var genesisBlock = new Block(transactions, null);
+    genesisBlock.calculateHash(0);
+    this.blocks.push(genesisBlock);
+    this.index = 0;
   }
 
   /**
@@ -87,16 +108,23 @@ class Blockchain {
    */
   getHeadBlock() {
     // Your code here
-
+    return this.blocks[0]
   }
 
   /**
    * Accepts an array of transactions, creating a new block with them and
    * adding it to the chain.
    */
-  addBlock(transactions) {
-    // Your code here
+  addBlock(transactions) 
+  {
+      console.log('Index-->' + this.index);
+      //let index = this.index + 1
+      let block = new Block(transactions, this.blocks[this.index].hash);
+      block.calculateHash(this.index +1);
 
+      this.blocks.push(block);
+
+      
   }
 
   /**
